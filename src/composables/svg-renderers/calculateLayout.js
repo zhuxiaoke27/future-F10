@@ -2,6 +2,7 @@
  * 布局计算模块
  * 负责计算SVG各区域的Y坐标和高度
  */
+import { wrapText } from '@/utils/textMeasure'
 
 /**
  * 计算SVG各区域布局
@@ -37,7 +38,16 @@ export function calculateLayout(options) {
   const textAreaY = titleY + titleHeight + 30
   let textAreaHeight = 0
   if (textAreaContent && textAreaContent.trim()) {
-    const textAreaLines = textAreaContent.split('\n')
+    // 计算文本区域的最大宽度
+    // 文字起始位置 x = padding + 28
+    // 右边界 = svgWidth - padding - 安全边距
+    // 可用宽度 = 右边界 - 起始位置
+    const textStartX = padding + 28
+    const rightBoundary = svgWidth - padding - 40 // 额外40px安全边距，防止字体渲染溢出
+    const maxTextWidth = rightBoundary - textStartX
+
+    // 使用自动换行函数计算实际行数
+    const textAreaLines = wrapText(textAreaContent, maxTextWidth, textAreaFontSize)
     const validLines = textAreaLines.filter(line => line.trim()).length
     textAreaHeight = validLines * (textAreaFontSize + 5) + 20
   }

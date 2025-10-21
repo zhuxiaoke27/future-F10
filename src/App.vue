@@ -26,6 +26,9 @@
       <button @click="handleExportNoWatermark" class="export-btn export-btn-no-watermark">
         导出为PNG（无水印）
       </button>
+      <button @click="handleExportCompressed" class="export-btn export-btn-compressed">
+        导出压缩版（&lt;900KB）
+      </button>
     </div>
   </div>
 </template>
@@ -42,7 +45,7 @@ import { useExport } from './composables/useExport'
 const { config } = useConfig()
 const { parseAllData, isLoading, loadingMessage, loadingProgress } = useDataParser()
 const { generateInfoGraphic } = useSVGRenderer()
-const { exportToPNG } = useExport()
+const { exportToPNG, exportCompressedPNG } = useExport()
 
 const inputPanelRef = ref(null)
 const previewPanelRef = ref(null)
@@ -125,6 +128,28 @@ const handleExportNoWatermark = async () => {
     alert('导出成功（无水印）！')
   } catch (error) {
     console.error('导出PNG失败:', error)
+    alert('导出失败：' + error.message)
+  }
+}
+
+/**
+ * 处理导出压缩版PNG（文件大小<900KB）
+ */
+const handleExportCompressed = async () => {
+  if (!previewPanelRef.value || !previewPanelRef.value.svgContainer) {
+    alert('请先生成信息图')
+    return
+  }
+
+  try {
+    const result = await exportCompressedPNG(
+      previewPanelRef.value.svgContainer,
+      'f10-infographic-compressed.jpg',
+      true  // 包含水印
+    )
+    alert(`导出成功！\n文件大小: ${result.sizeKB}KB\n${result.scale < 1 ? `图片缩放比例: ${(result.scale * 100).toFixed(0)}%` : ''}`)
+  } catch (error) {
+    console.error('导出压缩PNG失败:', error)
     alert('导出失败：' + error.message)
   }
 }
@@ -216,5 +241,13 @@ const handleExportNoWatermark = async () => {
 
 .export-btn-no-watermark:hover {
   background-color: #0056b3;
+}
+
+.export-btn-compressed {
+  background-color: #ff9800;
+}
+
+.export-btn-compressed:hover {
+  background-color: #f57c00;
 }
 </style>

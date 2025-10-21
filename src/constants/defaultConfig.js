@@ -6,7 +6,7 @@ export const defaultConfig = {
   mainTitle: '同花顺期货通',
   subtitle: '[[F10信息长图]]',
   textAreaContent: '',
-  copyright: '版权所有 © 同花顺期货通',
+  copyright: '* 以上内容仅作为数据整理，不作为投资建议\n版权所有 © 同花顺期货通',
 
   // 显示选项
   showMainImage: true,
