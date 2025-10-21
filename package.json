@@ -1,0 +1,19 @@
+{
+  "name": "f10-options-generator",
+  "version": "2.0.0",
+  "description": "期货通-F10运营图生成器 (Vue 3重构版)",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "^3.4.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.0",
+    "vite": "^5.0.0"
+  }
+}
