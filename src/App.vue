@@ -42,7 +42,7 @@ import { useDataParser } from './composables/useDataParser'
 import { useSVGRenderer } from './composables/useSVGRenderer'
 import { useExport } from './composables/useExport'
 
-const { config } = useConfig()
+const { config, saveConfigToStorage } = useConfig()
 const { parseAllData, isLoading, loadingMessage, loadingProgress } = useDataParser()
 const { generateInfoGraphic } = useSVGRenderer()
 const { exportToPNG, exportCompressedPNG } = useExport()
@@ -103,7 +103,11 @@ const handleExport = async () => {
       'f10-infographic.png',
       true  // 包含水印
     )
-    alert('导出成功！')
+
+    // 导出成功后自动保存配置
+    saveConfigToStorage()
+
+    alert('导出成功！\n当前配置已自动保存')
   } catch (error) {
     console.error('导出PNG失败:', error)
     alert('导出失败：' + error.message)
@@ -125,7 +129,11 @@ const handleExportNoWatermark = async () => {
       'f10-infographic-no-watermark.png',
       false  // 不包含水印
     )
-    alert('导出成功（无水印）！')
+
+    // 导出成功后自动保存配置
+    saveConfigToStorage()
+
+    alert('导出成功（无水印）！\n当前配置已自动保存')
   } catch (error) {
     console.error('导出PNG失败:', error)
     alert('导出失败：' + error.message)
@@ -147,7 +155,11 @@ const handleExportCompressed = async () => {
       'f10-infographic-compressed.jpg',
       true  // 包含水印
     )
-    alert(`导出成功！\n文件大小: ${result.sizeKB}KB\n${result.scale < 1 ? `图片缩放比例: ${(result.scale * 100).toFixed(0)}%` : ''}`)
+
+    // 导出成功后自动保存配置
+    saveConfigToStorage()
+
+    alert(`导出成功！\n文件大小: ${result.sizeKB}KB\n${result.scale < 1 ? `图片缩放比例: ${(result.scale * 100).toFixed(0)}%` : ''}\n\n当前配置已自动保存`)
   } catch (error) {
     console.error('导出压缩PNG失败:', error)
     alert('导出失败：' + error.message)

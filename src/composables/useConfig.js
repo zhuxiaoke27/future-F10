@@ -5,6 +5,7 @@
 import { reactive, computed } from 'vue'
 import { defaultConfig } from '@/constants/defaultConfig'
 import { colorTemplates } from '@/constants/colorTemplates'
+import { loadConfig, saveConfig } from './useConfigPersistence'
 
 // 全局配置状态
 const config = reactive({
@@ -54,6 +55,19 @@ const config = reactive({
   accountLogoSrc: defaultConfig.accountLogoSrc,
   insideBgSrc: defaultConfig.insideBgSrc
 })
+
+// 自动加载保存的配置
+const loadSavedConfig = () => {
+  const result = loadConfig()
+  if (result.success && result.data) {
+    // 合并保存的配置到当前配置
+    Object.assign(config, result.data)
+    console.log('✅ 已自动恢复上次保存的配置')
+  }
+}
+
+// 页面加载时立即尝试恢复配置
+loadSavedConfig()
 
 /**
  * 使用配置的组合式函数
@@ -120,6 +134,13 @@ export function useConfig() {
   }
 
   /**
+   * 保存当前配置到 LocalStorage
+   */
+  const saveConfigToStorage = () => {
+    return saveConfig(config)
+  }
+
+  /**
    * 计算最后一列的实际字体大小
    */
   const lastColumnFontSize = computed(() => {
@@ -131,6 +152,7 @@ export function useConfig() {
     applyColorTemplate,
     clearTemplateSelection,
     resetConfig,
+    saveConfigToStorage,
     lastColumnFontSize
   }
 }

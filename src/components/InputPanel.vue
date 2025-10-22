@@ -423,6 +423,33 @@
       </div>
     </div>
 
+    <!-- 配置管理 -->
+    <div class="section-title">配置管理</div>
+
+    <div class="form-group">
+      <div class="config-buttons">
+        <button @click="handleExportConfig" class="config-btn config-btn-export">
+          📥 导出配置
+        </button>
+        <button @click="triggerImportConfig" class="config-btn config-btn-import">
+          📤 导入配置
+        </button>
+        <button @click="handleResetConfig" class="config-btn config-btn-reset">
+          🔄 恢复默认
+        </button>
+      </div>
+      <input
+        ref="configFileInput"
+        type="file"
+        accept=".json"
+        @change="handleImportConfig"
+        style="display: none;"
+      >
+      <div class="config-hint">
+        提示：配置在每次导出图片后自动保存，重新打开页面时会自动恢复
+      </div>
+    </div>
+
     <button @click="$emit('generate')">生成信息图</button>
   </div>
 </template>
@@ -432,14 +459,16 @@ import { ref } from 'vue'
 import { useConfig } from '@/composables/useConfig'
 import { colorTemplates } from '@/constants/colorTemplates'
 import { sampleLogoData, sampleJsonData } from '@/constants/sampleData'
+import { exportConfigFile, importConfigFile, clearConfig } from '@/composables/useConfigPersistence'
 
-const { config, applyColorTemplate, clearTemplateSelection } = useConfig()
+const { config, applyColorTemplate, clearTemplateSelection, resetConfig } = useConfig()
 
 // 文件和数据输入
 const mainImageFile = ref(null)
 const excelFile = ref(null)
 const jsonDataInput = ref('')
 const companyLogosInput = ref('')
+const configFileInput = ref(null)
 
 // 模板定义
 const templates = {
@@ -474,6 +503,49 @@ const fillSampleLogoData = () => {
   companyLogosInput.value = JSON.stringify(sampleLogoData, null, 2)
 }
 
+// 配置管理功能
+// 导出配置文件
+const handleExportConfig = () => {
+  const result = exportConfigFile(config)
+  if (result.success) {
+    alert('配置文件导出成功！')
+  } else {
+    alert('配置文件导出失败：' + result.error)
+  }
+}
+
+// 触发文件选择
+const triggerImportConfig = () => {
+  configFileInput.value.click()
+}
+
+// 导入配置文件
+const handleImportConfig = async (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  const result = await importConfigFile(file)
+  if (result.success) {
+    // 合并导入的配置到当前配置
+    Object.assign(config, result.data)
+    alert('配置文件导入成功！')
+  } else {
+    alert('配置文件导入失败：' + result.error)
+  }
+
+  // 清空文件选择，允许重复导入同一文件
+  event.target.value = ''
+}
+
+// 恢复默认配置
+const handleResetConfig = () => {
+  if (confirm('确定要恢复默认配置吗？当前配置将被清除。')) {
+    resetConfig()
+    clearConfig()
+    alert('已恢复默认配置！')
+  }
+}
+
 // 导出给父组件使用
 defineExpose({
   mainImageFile,
@@ -482,3 +554,66 @@ defineExpose({
   companyLogosInput
 })
 </script>
+
+<style scoped>
+/* 配置管理按钮 */
+.config-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.config-btn {
+  flex: 1;
+  min-width: 100px;
+  padding: 10px 16px;
+  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: white;
+  font-weight: 500;
+}
+
+.config-btn-export {
+  background-color: #28a745;
+}
+
+.config-btn-export:hover {
+  background-color: #218838;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+.config-btn-import {
+  background-color: #007bff;
+}
+
+.config-btn-import:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
+
+.config-btn-reset {
+  background-color: #dc3545;
+}
+
+.config-btn-reset:hover {
+  background-color: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+.config-hint {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.5;
+  padding: 8px 12px;
+  background-color: #f8f9fa;
+  border-left: 3px solid #007bff;
+  border-radius: 4px;
+}
+</style>
